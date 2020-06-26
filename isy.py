@@ -36,11 +36,12 @@ class ISY():
             else:
                 return
         
-            self.nodes[node.name] = Node(node.name, node.address, node.type, "unknown", node.property.get("uom"))
+            self.nodes[node.name] = Node(self, node.name, node.address, node.type, "unknown", node.property.get("uom"))
 
-class Node():
+class Node(ISY):
 
-    def __init__(self, name, address, category, status, properties):
+    def __init__(self, parent, name, address, category, status, properties):
+        self.parent = parent
         self.name = name
         self.address = address
         self.category = category
@@ -71,7 +72,7 @@ class Node():
     
     def on(self):
         extension = "/rest/nodes/{}/cmd/DON/".format(self.address)
-        #response = Messenger.get(extension, self.authorization, self.ip)
+        response = Messenger.get(extension, self.parent.authorization, self.parent.ip)
         print("Sent the On command!")
         return
 
