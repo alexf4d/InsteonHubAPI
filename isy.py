@@ -85,6 +85,9 @@ class ISY():
 
             self.scenes[scene.name] = Scene(self, name, scene.address)
 
+    def create_listener(self):
+        listener = Listener(self)
+        return
 
 class Node(ISY):
 
@@ -214,3 +217,13 @@ class Messenger():
         url = ("http://{}{}".format(ip, extension))
         response = requests.get(url, auth=authorization)
         return (response)
+
+class Listener(ISY):
+    # [ ] Listen for unsolicited feedback from the ISY Hub
+    # [ ] Based on feedback update Node or Scene instances
+    # [ ] Setup event handler to call user defined functions given a particular response
+    def __init__(self, parent):
+        self.parent = parent    
+
+
+
