@@ -1,2 +1,4 @@
-# InsteonHubAPI
-Python implementation of the Insteon Hub API and ISY Hub for Insteon API
+# isy-python-library
+Python implementation of the ISY Hub API for Insteon devices.
+
+Tested on an ISY 994i
