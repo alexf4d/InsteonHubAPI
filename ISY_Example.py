@@ -5,10 +5,9 @@ Example usage of the ISY module
 from isy import *
 import getpass
 
-
+ip = Finder.find()     # Auto discover IP Address of ISY hub
 username = input("Username:")   # Ask user for Username to ISY hub
-password = getpass.getpass("Password:") # Ask user for Password to ISY hub (Password hiden while typing in terminal)
-ip = input("IP address:") # Ask user for IP Address of the ISY hub
+password = getpass.getpass("Password:") # Ask user for Password to ISY hub (Password hiden while typing in terminal
 
 hub = ISY(username, password, ip)   # Create instance of an ISY hub
 hub.get_nodes("name") # Get the nodes from the hub; "name" = name referenced, "address" = Address referenced 

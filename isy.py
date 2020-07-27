@@ -5,6 +5,7 @@ from lxml import objectify, etree
 from typing import List
 import re
 
+import socket
 
 class ISY():
     #authorization = ""
@@ -225,5 +226,29 @@ class Listener(ISY):
     def __init__(self, parent):
         self.parent = parent    
 
+class Finder():
 
+    def find():
+        
+        msg = (
+            "M-SEARCH * HTTP/1.1\r\n"
+            "HOST:239.255.255.250:1900]\r\n"
+            "MAN:ssdp:discover\r\n"
+            "MX:1\r\n"
+            "ST:urn:udi-com:device:X_Insteon_Lighting_Device:1\r\n"
+            )
+
+        # A tuple with broadcast ip and port
+        serverAddress = ("239.255.255.250", 1900)
+        # Create a datagram socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(2)
+        s.sendto(msg.encode(), serverAddress)
+
+        try:
+            while True:
+                data, addr = s.recvfrom(65507)
+                return(addr[0])
+        except socket.timeout:
+            pass
 
