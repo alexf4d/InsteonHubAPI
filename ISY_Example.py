@@ -7,14 +7,14 @@ import getpass
 
 ip = Finder.find()     # Auto discover IP Address of ISY hub
 username = input("Username:")   # Ask user for Username to ISY hub
-password = getpass.getpass("Password:") # Ask user for Password to ISY hub (Password hiden while typing in terminal
+password = getpass.getpass("Password:") # Ask user for Password to ISY hub (Password hiden while typing in terminal)
 
 hub = ISY(username, password, ip)   # Create instance of an ISY hub
 
 event = hub.listen()
 
-hub.get_nodes() # Get the nodes from the hub; "name" = name referenced, "address" = Address referenced 
-hub.get_scenes() # Get the scenes from the hub; "name" = name referenced, "address" = Address referenced 
+hub.get_nodes() # Get the nodes from the hub
+hub.get_scenes() # Get the scenes from the hub
 
 print("List of Nodes:")
 print(hub.nodes)    # Print all Node objects (Name:Object)
@@ -23,7 +23,6 @@ print(hub.nodes)    # Print all Node objects (Name:Object)
 for node in hub.nodes:
     print("\n Properties available to {}:".format(node))
     print(hub.nodes[node].address)
-    print(hub.nodes[node].status)
     print(hub.nodes[node].properties)   # Print all the properites available to each node
 
     # Try to turn each node ON
@@ -50,5 +49,3 @@ for scene in hub.scenes:
     #hub.scenes['Home Scene'].on()                      # turn 'Home Scene' on
     #hub.scenes['Home Scene'].off()                     # turn 'Home Scene' off
     #hub.scenes['Home Scene'].dimmer(35)                # turn 'Home Scene' to 35%
-
-
