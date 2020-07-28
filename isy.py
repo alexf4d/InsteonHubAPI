@@ -7,6 +7,11 @@ import re
 
 import socket
 
+
+import websocket
+import threading
+
+
 class ISY():
     #authorization = ""
     #ip = ""
@@ -14,13 +19,9 @@ class ISY():
     def __init__(self, username, password, ip):
         self.authorization = (username, password)
         self.ip = ip
-    
-    def get_nodes(self, method):
+    def get_nodes(self):
         """
         Gets available nodes from the hub.
-
-        :param method: pass "name" for name referenced or "address" for address referenced
-        :returns: Null
         """
 
         extension = "/rest/nodes"
@@ -31,14 +32,8 @@ class ISY():
         self.nodes = {}
 
         for node in root.iterchildren(tag='node'):
-            if method == "name":
-                name = str(node.name)
-            elif method == "address":
-                name = str(node.address)
-            else:
-                return
-
-            self.nodes[node.name] = Node(self, name, node.address, node.type, node.property.get("formatted"), node.property.get("uom"))
+            self.nodes[node.name] = Node(self, node.name, node.address, node.type, node.property.get("formatted"), node.property.get("uom"))
+            self.nodes[node.address] = self.nodes[node.name]
 
     def get_node_status(self):
 
@@ -61,12 +56,9 @@ class ISY():
             status[self.nodes[node].name] = self.nodes[node].get_status()
         return(status)
 
-    def get_scenes(self, method):
+    def get_scenes(self):
         """
         Gets available scenes from the hub.
-
-        :param method: pass "name" for name referenced or "address" for address referenced
-        :returns: Null
         """
 
         extension = "/rest/nodes/scenes"
@@ -77,17 +69,16 @@ class ISY():
         self.scenes = {}
 
         for scene in root.iterchildren(tag='group'):
-            if method == "name":
-                name = str(scene.name)
-            elif method == "address":
-                name = str(scene.address)
-            else:
-                return
+            self.scenes[scene.name] = Scene(self, scene.name, scene.address)
 
-            self.scenes[scene.name] = Scene(self, name, scene.address)
-
-    def create_listener(self):
+    def listen(self):
         listener = Listener(self)
+
+        #Created the Threads
+        t1 = threading.Thread(target=listener.listen, args=())
+        #Started the threads
+        t1.start()
+        
         return
 
 class Node(ISY):
@@ -220,12 +211,43 @@ class Messenger():
         return (response)
 
 class Listener(ISY):
-    # [ ] Listen for unsolicited feedback from the ISY Hub
-    # [ ] Based on feedback update Node or Scene instances
+    # [X] Listen for unsolicited feedback from the ISY Hub
+    # [X] Based on feedback update Node or Scene instances
     # [ ] Setup event handler to call user defined functions given a particular response
     def __init__(self, parent):
-        self.parent = parent    
+        self.parent = parent 
 
+    def on_message(self, message):
+        try:
+            print(message)
+            root = objectify.fromstring(message)
+            for root in root.iterchildren(tag='node'):
+                self.address = root
+            self.parent.nodes[self.address].get_status()
+            print(self.parent.nodes[self.address].name)
+            print(self.parent.nodes[self.address].status)
+
+            return
+        except:
+            pass
+
+    def listen(self):
+        version_str = "Sec-WebSocket-Version: 13"
+        protocol_str = "Sec-WebSocket-Protocol: ISYSUB"
+
+        message = self.parent.authorization[0]+":"+self.parent.authorization[1]
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        base64_message = base64_bytes.decode('ascii')
+        authorization_str = "Authorization: Basic " + base64_message
+
+        websocket.enableTrace(True)
+        self.ws = websocket.WebSocketApp("ws://"+self.parent.ip+"/rest/subscribe",
+                                on_message = self.on_message,
+                                header = [protocol_str, version_str, authorization_str]
+                                )
+        self.ws.run_forever()
+    
 class Finder():
 
     def find():

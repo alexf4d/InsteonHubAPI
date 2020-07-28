@@ -10,14 +10,20 @@ username = input("Username:")   # Ask user for Username to ISY hub
 password = getpass.getpass("Password:") # Ask user for Password to ISY hub (Password hiden while typing in terminal
 
 hub = ISY(username, password, ip)   # Create instance of an ISY hub
-hub.get_nodes("name") # Get the nodes from the hub; "name" = name referenced, "address" = Address referenced 
-hub.get_scenes("name") # Get the scenes from the hub; "name" = name referenced, "address" = Address referenced 
+
+event = hub.listen()
+
+hub.get_nodes() # Get the nodes from the hub; "name" = name referenced, "address" = Address referenced 
+hub.get_scenes() # Get the scenes from the hub; "name" = name referenced, "address" = Address referenced 
 
 print("List of Nodes:")
 print(hub.nodes)    # Print all Node objects (Name:Object)
 
+
 for node in hub.nodes:
     print("\n Properties available to {}:".format(node))
+    print(hub.nodes[node].address)
+    print(hub.nodes[node].status)
     print(hub.nodes[node].properties)   # Print all the properites available to each node
 
     # Try to turn each node ON
