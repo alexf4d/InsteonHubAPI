@@ -109,9 +109,14 @@ class Node(ISY):
             self.properties["Medium"] = True
         if "high" in properties:
             self.properties["High"] = True
-
+        
+        self.callback_function = None
+    
     def __str__(self):
         return str(self.name)
+    
+    def subscribe(self, function):
+        self.callback_function = function
     
     def get_status(self):
         extension = "/rest/status/{}".format(self.address)
@@ -213,19 +218,25 @@ class Messenger():
 class Listener(ISY):
     # [X] Listen for unsolicited feedback from the ISY Hub
     # [X] Based on feedback update Node or Scene instances
-    # [ ] Setup event handler to call user defined functions given a particular response
+    # [X] Setup event handler to call user defined functions given a particular response
     def __init__(self, parent):
         self.parent = parent 
 
     def on_message(self, message):
         try:
-            print(message)
+            # print(message)
             root = objectify.fromstring(message)
             for root in root.iterchildren(tag='node'):
                 self.address = root
             self.parent.nodes[self.address].get_status()
-            print(self.parent.nodes[self.address].name)
-            print(self.parent.nodes[self.address].status)
+            callback = self.parent.nodes[self.address].callback_function
+            if callback == None:
+                return
+            else:
+                if callable(callback):
+                    callback(self.parent.nodes[self.address])
+                else:
+                    print("Error : Callback function is not callable.")
 
             return
         except:
@@ -273,4 +284,3 @@ class Finder():
                 return(addr[0])
         except socket.timeout:
             pass
-
